@@ -1,5 +1,22 @@
+buildscript {
+    repositories {
+        // For build scan nightlies
+        maven { url 'https://repo.gradle.org/gradle/enterprise-libs-snapshots-local' }
+    }
+    dependencies {
+        classpath 'com.gradle:build-scan-plugin:2.1-20181113000200-maven'//latest.integration'
+    }
+}
+
 plugins {
     id 'java'
+}
+
+apply plugin: 'com.gradle.build-scan'
+buildScan {
+    publishAlways()
+    server = 'https://ge-experiment.grdev.net'
+    capturePerFileTaskInputs = true
 }
 
 repositories {
@@ -7,6 +24,37 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.guava:guava:23.0'
-    testCompile 'junit:junit:4.12'
+    implementation project(':submodule1')
+    implementation 'com.google.guava:guava:23.0'
+    
+    testImplementation 'junit:junit:4.12'
+}
+
+@CacheableTask
+class MyCacheableTask extends DefaultTask {
+    
+    @InputFile
+    File getDate() {
+        return project.file("$project.projectDir/date.txt")
+    }
+
+    @OutputFile
+    File getDateFile() {
+        return project.file("$project.buildDir/date.txt")
+    }
+
+    @TaskAction
+    void perform() {
+        dateFile.write date.text
+    }
+}
+
+tasks.register("createInput") {
+    doLast {
+        project.file("$project.projectDir/date.txt").text = new Date().toString()
+    }
+}
+
+tasks.register("dateTask", MyCacheableTask) {
+    dependsOn "createInput"
 }

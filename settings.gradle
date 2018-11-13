@@ -1,2 +1,3 @@
-rootProject.name = 'gradle-build-scan-quickstart'
+rootProject.name = 'per-file-input-comparison'
 
+include ':submodule1'
