@@ -3,20 +3,22 @@ buildscript {
         // For build scan nightlies
         maven { url 'https://repo.gradle.org/gradle/enterprise-libs-snapshots-local' }
     }
-    dependencies {
-        classpath 'com.gradle:build-scan-plugin:2.1-20181113000200-maven'//latest.integration'
-    }
+//    dependencies {
+//        classpath 'com.gradle:build-scan-plugin:latest.integration'
+//    }
 }
 
 plugins {
     id 'java'
+    id "com.gradle.build-scan" version "2.1"
 }
 
-apply plugin: 'com.gradle.build-scan'
+//apply plugin: 'com.gradle.build-scan'
 buildScan {
     publishAlways()
-    server = 'https://ge-experiment.grdev.net'
-    capturePerFileTaskInputs = true
+//    server = 'https://ge-experiment.grdev.net'
+    server = 'https://e.grdev.net'
+    captureTaskInputFiles = true
 }
 
 repositories {
@@ -33,6 +35,7 @@ dependencies {
 @CacheableTask
 class MyCacheableTask extends DefaultTask {
     
+    @PathSensitive(PathSensitivity.RELATIVE)
     @InputFile
     File getDate() {
         return project.file("$project.projectDir/date.txt")
@@ -40,11 +43,11 @@ class MyCacheableTask extends DefaultTask {
 
     @OutputFile
     File getDateFile() {
-        return project.file("$project.buildDir/date.txt")
+        return project.file("$project.buildDir/date/date.txt")
     }
 
     @TaskAction
-    void perform() {
+    def action() {
         dateFile.write date.text
     }
 }
@@ -57,4 +60,31 @@ tasks.register("createInput") {
 
 tasks.register("dateTask", MyCacheableTask) {
     dependsOn "createInput"
+}
+
+@CacheableTask
+class UuidTask extends DefaultTask {
+    
+    @Input
+    String getUuid() {
+        return UUID.randomUUID().toString()
+    }
+    
+    @OutputFile
+    File getUuidFile() {
+        return project.file("$project.buildDir/uuid/uuid.txt")
+    }
+    
+    @TaskAction
+    def action() {
+        uuidFile.write uuid
+    }
+}
+
+tasks.register("uuidTask", UuidTask)
+
+subprojects {
+    tasks.withType(Jar) {
+        manifest.attributes "date": new Date().toString()
+    }
 }
