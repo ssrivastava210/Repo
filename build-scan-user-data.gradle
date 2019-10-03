@@ -58,10 +58,10 @@ void addCiMetadata() {
     }
 
     if (isTeamCity()) {
-        if (System.getenv('SERVER_URL') && System.getenv('BUILD_NUMBER')) {
+        if (System.getenv('SERVER_URL') && project.hasProperty('teamcity.agent.dotnet.build_id')) {
             def teamCityServerUrl = System.getenv('SERVER_URL')
-            def teamCityBuildNumber = System.getenv('BUILD_NUMBER')
-            buildScan.link 'TeamCity build', "${appendIfMissing(teamCityServerUrl, "/")}viewLog.html?buildId=${teamCityBuildNumber}"
+            def teamCityBuildId = project.property('teamcity.agent.dotnet.build_id')
+            buildScan.link 'TeamCity build', "${appendIfMissing(teamCityServerUrl, "/")}viewLog.html?buildId=${teamCityBuildId}"
         }
         if (System.getenv('BUILD_NUMBER')) {
             buildScan.value 'CI build number', System.getenv('BUILD_NUMBER')
