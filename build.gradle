@@ -3,6 +3,8 @@ plugins {
     id 'java'
 }
 
+apply from: 'build-scan-user-data.gradle'
+
 repositories {
     jcenter()
 }
