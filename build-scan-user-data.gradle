@@ -68,6 +68,7 @@ void addCiMetadata() {
         }
         println System.properties
         println System.getenv()
+        println project.properties
         if (System.getProperty('system.agent.name')) {
             buildScan.tag System.getProperty('system.agent.name')
         }
