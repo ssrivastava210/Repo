@@ -58,9 +58,9 @@ void addCiMetadata() {
 
     // Team City
     if (System.getenv('TEAMCITY_VERSION')) {
-        def teamCityServerUrl = System.getenv('teamcity.serverUrl')
-        def teamCityBuildId = System.getenv('teamcity.build.id')
-        buildScan.link 'TeamCity build', "${appendIfMissing(teamCityServerUrl, "/")}viewLog.html?buildId=${teamCityBuildId}"
+        def teamCityServerUrl = System.getenv('SERVER_URL')
+        def teamCityBuildNumber = System.getenv('BUILD_NUMBER')
+        buildScan.link 'TeamCity build', "${appendIfMissing(teamCityServerUrl, "/")}viewLog.html?buildId=${teamCityBuildNumber}"
     }
 
     // Circle CI
