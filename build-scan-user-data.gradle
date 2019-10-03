@@ -66,6 +66,7 @@ void addCiMetadata() {
         if (System.getenv('BUILD_NUMBER')) {
             buildScan.value 'CI build number', System.getenv('BUILD_NUMBER')
         }
+        println System.properties
         if (System.getProperty('system.agent.name')) {
             buildScan.tag System.getProperty('system.agent.name')
         }
