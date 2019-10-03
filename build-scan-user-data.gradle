@@ -186,7 +186,7 @@ static String appendIfMissing(String str, String suffix) {
 
 static boolean isGitInstalled() {
     try {
-        "git --version".execute().exitValue() == 0
+        "git --version".execute().waitFor() == 0
     } catch (IOException ignored) {
         false
     }
