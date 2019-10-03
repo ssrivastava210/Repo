@@ -46,7 +46,7 @@ void addCiMetadata() {
         if (System.getenv('NODE_NAME')) {
             def agentName = System.getenv('NODE_NAME')
             buildScan.tag agentName
-            buildScan.value 'CI agent name', agentName
+            buildScan.value 'CI node name', agentName
         }
         if (System.getenv('JOB_NAME')) {
             def jobNameLabel = 'CI job'
