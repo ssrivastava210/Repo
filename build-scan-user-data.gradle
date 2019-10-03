@@ -67,7 +67,9 @@ void addCiMetadata() {
             buildScan.value 'CI build number', System.getenv('BUILD_NUMBER')
         }
         if (project.hasProperty('agent.name')) {
-            buildScan.tag project.property('agent.name')
+            def agentName = project.property('agent.name')
+            buildScan.tag agentName
+            buildScan.value 'CI agent name', agentName
         }
     }
 
@@ -101,36 +103,37 @@ void addCiMetadata() {
 
 void addGitMetadata() {
     buildScan.background {
-        if (isGitInstalled()) {
-            def gitCommitId = execAndGetStdout('git', 'rev-parse', '--short=8', '--verify', 'HEAD')
-            def gitBranchName = execAndGetStdout('git', 'rev-parse', '--abbrev-ref', 'HEAD')
-            def gitStatus = execAndGetStdout('git', 'status', '--porcelain')
+        if (!isGitInstalled()) {
+            return
+        }
+        def gitCommitId = execAndGetStdout('git', 'rev-parse', '--short=8', '--verify', 'HEAD')
+        def gitBranchName = execAndGetStdout('git', 'rev-parse', '--abbrev-ref', 'HEAD')
+        def gitStatus = execAndGetStdout('git', 'status', '--porcelain')
 
-            if (gitCommitId) {
-                def commitIdLabel = 'Git commit id'
-                value commitIdLabel, gitCommitId
-                addCustomValueSearchLink 'Git commit id build scans', [(commitIdLabel): gitCommitId]
-                def originUrl = execAndGetStdout('git', 'config', '--get', 'remote.origin.url')
-                if (originUrl.contains('github.com')) { // only for GitHub
-                    def repoPath = (originUrl =~ /(.*)github\.com[\/|:](.*).git/)[0][2]
-                    link 'Github Source', "https://github.com/$repoPath/tree/" + gitCommitId
-                }
+        if (gitCommitId) {
+            def commitIdLabel = 'Git commit id'
+            value commitIdLabel, gitCommitId
+            addCustomValueSearchLink 'Git commit id build scans', [(commitIdLabel): gitCommitId]
+            def originUrl = execAndGetStdout('git', 'config', '--get', 'remote.origin.url')
+            if (originUrl.contains('github.com')) { // only for GitHub
+                def repoPath = (originUrl =~ /(.*)github\.com[\/|:](.*).git/)[0][2]
+                link 'Github Source', "https://github.com/$repoPath/tree/" + gitCommitId
             }
-            if (gitBranchName) {
-                tag gitBranchName
-                value 'Git branch', gitBranchName
-            }
-            if (gitStatus) {
-                tag 'Dirty'
-                value 'Git status', gitStatus
-            }
+        }
+        if (gitBranchName) {
+            tag gitBranchName
+            value 'Git branch', gitBranchName
+        }
+        if (gitStatus) {
+            tag 'Dirty'
+            value 'Git status', gitStatus
         }
     }
 }
 
 void addTestParallelization() {
     allprojects { p ->
-        p.tasks.withType(Test) { t -> doFirst { buildScan.value "Test#maxParallelForks[${t.path}]", t.maxParallelForks.toString() } }
+        p.tasks.withType(Test).configureEach { t -> doFirst { buildScan.value "[${t.identityPath}]#maxParallelForks", t.maxParallelForks.toString() } }
     }
 }
 
