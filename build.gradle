@@ -3,6 +3,10 @@ plugins {
     id 'java'
 }
 
+buildScan {
+    server = 'https://e.grdev.net'
+}
+
 apply from: 'build-scan-user-data.gradle'
 
 repositories {
